@@ -52,6 +52,7 @@ let num2 = "";
 let operator = "";
 let floatingPoint = false;
 let error = false;
+let operatorMarked = false;
 
 
 buttons.forEach(b => {
@@ -72,6 +73,7 @@ buttons.forEach(b => {
             calculated = false;
             floatingPoint = false;
             error = false;
+            operatorMarked = false;
 
         }
 
@@ -91,14 +93,13 @@ buttons.forEach(b => {
 
 
         if (num1 !== "" && !isNumber) {
-            if (operators[activeButton] != undefined) {
-                //num1 = +num1;
+            if (operators[activeButton] != undefined && !operatorMarked) {
+                operatorMarked = true;
                 display_value += activeButton;
                 operator = operators[activeButton];
                 calculating = true;
                 floatingPoint = false;
             } else if (num2 !== "" && activeButton == "=") {
-                //num2 = +num2;
                 calculated = true;
                 calculating = false;
                 display_value = operate(e, operator, num1, num2)
