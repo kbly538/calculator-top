@@ -30,6 +30,7 @@ function operate(e, operator, a, b) {
             return a * b;
         case "divide": {
             if (b != 0) {
+                console.log(a, b, operator, Math.round(a * 100 / b * 100) / 10000);
                 return Math.round(a * 100 / b * 100) / 1000;
             }
             throw new Error();
@@ -102,6 +103,7 @@ buttons.forEach(b => {
             } else if (num2 !== "" && activeButton == "=") {
                 calculated = true;
                 calculating = false;
+                console.log(operator, num1, num2)
                 display_value = operate(e, operator, num1, num2)
             }
         } else {
