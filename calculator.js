@@ -7,11 +7,12 @@ function operate(operator, a, b)
     const matchOnlyNumberRe = /NaN|-?((\d*\.\d+|\d+)([Ee][+-]?\d+)?|Infinity)$/;
     const numbersValid = a.match(matchOnlyNumberRe) != null && b.match(matchOnlyNumberRe) != null;
     
-    if (!numbersValid)
+    if (!numbersValid )
     {
         return;
     }
 
+    
     a = +(a);
     b = +(b);
 
@@ -32,4 +33,5 @@ function operate(operator, a, b)
         }
     }
 }
+
 
