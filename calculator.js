@@ -39,7 +39,7 @@ function operate(operator, a, b) {
 }
 
 
-let numbersRE = /[\d|.]/;
+let calcEntryRegExp = /[\d|.]/;
 
 
 
@@ -70,17 +70,17 @@ buttons.forEach(b => {
 
 
 
+
         if (calculated || activeButton == "AC") {
             display_value = "";
             num1 = "";
             num2 = "";
             operator = "";
-            calculated = false;
             floatingPoint = false;
             error = false;
             operatorMarked = false;
             calculating = false;
-
+            calculated = false;
         }
 
         if (((num1 === "") && (!isNumber && (activeButton != "AC" && activeButton != "-")))) {
@@ -92,40 +92,48 @@ buttons.forEach(b => {
                 display_value = display_value;
             }
             else {
-                    display_value = "ERROR"
-                    error = true;
-                }
-            
-                calculated = true;
-            } else if ((num1 === "") && activeButton == "-"){
-                num1 += "-";
+                display_value = "ERROR"
+                error = true;
             }
+
+            calculated = true;
+        } else if ((num1 === "") && activeButton == "-") {
+            num1 += "-";
+        }
 
 
 
         if (num1 !== "" && !isNumber) {
             if (operators[activeButton] != undefined && !operatorMarked) {
-                    if (num1 !== "-"){
-                        operatorMarked = true;
-                        display_value += activeButton;
-                        operator = operators[activeButton];
-                        calculating = true;
-                        floatingPoint = false;
-                        operatorStage = true;
-                        num1Stage = false;
-                        num2Stage = false;
-                    } else {
-                        display_value += activeButton;
-                        operator = operators[activeButton];
-                        floatingPoint = false;
-                    }
+
+
+                if (num1 !== "-") {
+                    operatorMarked = true;
+                    display_value += activeButton;
+                    operator = operators[activeButton];
+                    calculating = true;
+                    floatingPoint = false;
+                    operatorStage = true;
+                    num1Stage = false;
+                    operatorStage = true;
+                    num2Stage = false;
+                } else {
+                    display_value += activeButton;
+                    operator = operators[activeButton];
+                    floatingPoint = false;
+
+                }
             } else if (num2 !== "" && activeButton == "=") {
                 calculated = true;
                 calculating = false;
                 display_value = operate(operator, num1, num2);
+                num1Stage = false;
+                num2Stage = false;
+                operatorStage = false;
             }
         } else {
             if (!calculating && (isNumber || activeButton == ".") && !error) {
+                num1Stage = true;
                 if (activeButton == "." && floatingPoint) {
                     return;
                 } else if (activeButton == ".") {
@@ -135,57 +143,73 @@ buttons.forEach(b => {
                 if (num1.length < 8 || operators[activeButton] === "-") {
                     num1 += activeButton;
                     display_value += activeButton;
-                    
+                    num2Stage = false;
+                    operatorStage = false;
+
                 } else {
                     alert("Cannot be larger than this.")
                 }
             } else if (calculating && isNumber || activeButton == "." && !error) {
+                num2Stage = true;
                 if (activeButton == "." && floatingPoint) {
                     return;
                 } else if (activeButton == ".") {
                     floatingPoint = true;
                 }
                 if (num2.length < 8) {
-                    num1Stage = false;
-                    operatorStage = false;
-                    num2Stage = true;
                     num2 += activeButton;
                     display_value += activeButton;
+                    num1Stage = false;
+                    operatorStage = false;
 
                 }
             }
         }
 
 
-        if (activeButton === "CE")
-        {
-            if (num1Stage){
+        if (activeButton === "CE") {
+            if (num1Stage) {
                 console.log("before1: " + display_value)
-                num1 = num1.slice(0, num1.length-1);
-                display_value = display_value.slice(0, display_value.length-1);
-                console.log("after 1: " + display_value)
-            
-                
-            } else if(num2Stage)
-            {
-                console.log("before2: " + display_value)
-                num2 = num2.slice(0, num2.length-1);
-                console.log("after2" + display_value)
+                num1 = num1.slice(0, num1.length - 1);
+                display_value = display_value.slice(0, display_value.length - 1);
+                console.log("after1: " + display_value)
+                num2Stage = false;
+                operatorStage = false;
+                num1Stage = true;
 
-                display_value = display_value.slice(0, display_value.length-1);
-            }else if(operatorStage){
+
+            } else if (num2Stage) {
+                console.log("before2: " + display_value)
+                num2 = num2.slice(0, num2.length - 1);
+                console.log("after2" + display_value)
+                display_value = display_value.slice(0, display_value.length - 1);
+                if (display_value != isNumber) {
+                    operatorStage = true;
+                    num2Stage = false;
+
+                } else {
+                    operatorStage = false;
+                }
+            } else if (operatorStage) {
                 console.log("beforeop: " + display_value)
                 operator = "";
                 calculating = false;
                 num2 = "";
+                num2Stage = false;
                 operatorMarked = false;
                 num1Stage = true;
-                display_value = display_value.slice(0, display_value.length-1);
+                display_value = display_value.slice(0, display_value.length - 1);
+                operatorStage = true;
                 console.log("after: " + display_value)
+            } else {
+                calculated = true;
+                display_value = "0";
+                num1Stage = true;
             }
         }
 
         display.textContent = display_value;
+        
 
     });
 })
