@@ -86,8 +86,6 @@ buttons.forEach(b => {
         if (((num1 === "") && (!isNumber && (activeButton != "AC" && activeButton != "-")))) {
             if (activeButton === "mod") {
                 display_value = "NOT IMPLEMENTED"
-            } else if (activeButton === "%") {
-                display_value = "NOT IMPLEMENTED"
             } else if (activeButton === "xy" || activeButton === "y") {
                 display_value = "NOT IMPLEMENTED";
             } else if ((num1 === "" || num2 === "") && activeButton === "=") {
