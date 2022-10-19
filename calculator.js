@@ -157,7 +157,7 @@ buttons.forEach(b => {
         }
 
 
-        if (activeButton === "ce")
+        if (activeButton === "CE")
         {
             if (num1Stage){
                 console.log("before1: " + display_value)
