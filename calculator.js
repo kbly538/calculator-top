@@ -73,7 +73,7 @@ function checkIfNegative(num) {
 function resetCalculation() {
 
     num1 = "";
-    display_value = "";
+    display_value = "_";
     num1 = "";
     num2 = "";
     operator = "";
@@ -98,6 +98,7 @@ function undoAction() {
         display_value = display_value.slice(0, display_value.length - 1);
         if (display_value === "") {
             resetCalculation();
+            
         }
         currentState = States.FirstOperand;
 
@@ -225,6 +226,12 @@ buttons.forEach(b => {
             {
                 buttonPressed = "0."
             }
+            if (calculationStatus === CalculationStatus.NotCalculating)
+            {
+                display_value = "";
+                calculationStatus = CalculationStatus.Calculating;
+            }
+
 
             currentState = States.FirstOperand
             calculationStatus = CalculationStatus.Calculating;
