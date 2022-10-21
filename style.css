@@ -64,7 +64,7 @@ body {
 .display {
     height: 200px;
     width: var(--width);
-    padding: 50px 30px 0 30px;
+    padding: 30px 30px 0 30px;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
     margin: 0 auto;
@@ -72,30 +72,49 @@ body {
     flex: 0 0 auto;
     box-sizing: border-box;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     background: linear-gradient(180deg, rgb(37, 37, 37) 5%, rgb(19, 19, 19) 0%)
 }
 
 .screen {
     background-color: rgb(64, 114, 64);
-    border: 5px solid rgb(44, 44, 44);
+    height: 100%;
     width: 100%;
-    border-radius: 10px;
-    display: flex;
-    flex-direction: row-reverse;
-    align-items: flex-end;
-    justify-content: flex-start;
-    flex-wrap: wrap;
-
+    display: block;
+    border-radius: 5px;
 }
 
+.screen > div {
+    padding: 10px 0 0 0;
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: flex-start;
+    justify-content: end;
+    min-height: 50%;
+}
+
+.top-screen {
+    min-height: 50%;
+    
+}
+
+.bottom-screen {
+    min-height: 50%;
+}
+
+.top-screen > div {
+    font-size: 30px;
+}
+
+
 .screen-text{
-    padding: 5px;
+
     font-family: 'Courier New', Courier, monospace;
     font-size: 50px;
     margin-right: 20px;
     color:black;
-    flex-shrink: 5;
+    flex: 0 0 auto; 
 }
 
 
@@ -143,6 +162,21 @@ body {
     align-items: center;
 }
 
+.button:active {
+    background-color: red;
+}
+
+.button.operator {
+    background-color: rgb(224, 138, 68);
+}
+
+.button#AC {
+    background-color: rgb(191, 60, 60);
+}
+
+.button#equals {
+    background-color: rgb(69, 143, 69);
+}
 
 
 

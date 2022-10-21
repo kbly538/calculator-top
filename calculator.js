@@ -3,58 +3,92 @@
 const IMPLEMENTATION_MESSAGE = "NOT IMPLEMENTED";
 const ERROR_DISPLAY_MESSAGE = "ERR";
 
+let currentCalculationText = "";
+let calculationResultText = "";
 
-let display_value = "";
+
 const operators = { "÷": "divide", "×": "multiply", "-": "subtract", "+": "add" }
 const Operations = { Mod: "mod", Power: "pow", ClearAll: "AC", UndoAction: "CE" };
-const States = { FirstOperand: 1, SecondOperand: 2, Operator: 3 };
+const States = { ProcessingFirstOperand: 1, ProcessingSecondOperand: 2, Operator: 3 };
 const CalculationStatus = { NotCalculating: 1, Calculating: 2, Calculated: 3 }
 
 
 let buttons = document.querySelectorAll(".button");
-let display = document.querySelector(".screen-text")
+let display = document.querySelector(".bottom-screen>div")
+let calculationDisplay = document.querySelector(".top-screen>div");
+
+calculationDisplay.textContent = ""
+
 
 function operate(operator, a, b) {
 
 
-    const matchOnlyNumberRe = /NaN|-?((\d*\.\d+|\d+)([Ee][+-]?\d+)?|Infinity)$/;
-    const numbersValid = a.match(matchOnlyNumberRe) != null && b.match(matchOnlyNumberRe) != null;
+    // Cast to string for validation
+    a = String(a);
+    b = String(b);
 
+    if (!validateNumber(a, b)) return ERROR_DISPLAY_MESSAGE;
 
-    if (!numbersValid) {
-        return ERROR_DISPLAY_MESSAGE;
-    }
+    // Cast back to number for processing
+    a = Number(a);
+    b = Number(b);
 
-
-    a = +(a);
-    b = +(b);
 
     switch (operator) {
         case "add":
-            return a + b;
+            return String(add(a, b));
         case "subtract":
-            return a - b;
+            return String(subtract(a, b));
         case "multiply":
-            return a * b;
+            return String(multiply(a, b));
         case "divide": {
-            if (b != 0) {
-                return Math.round(a * 1000 / b * 1000) / 10000
-
-            }
-            return ERROR_DISPLAY_MESSAGE
-
-
+            return String(divide(a, b));
         }
     }
+}
+
+function validateNumber(a, b) {
+    const matchOnlyNumberRe = /NaN|-?((\d*\.\d+|\d+)([Ee][+-]?\d+)?|Infinity)$/;
+    const numbersValid = a.match(matchOnlyNumberRe) != null && b.match(matchOnlyNumberRe) != null;
+
+    return numbersValid;
+}
+
+
+function floatPrecisionTo(precision, a, b){
+    defaultPrecision = "1";
+    for (let zeros = 0; zeros < precision; zeros++){
+        defaultPrecision += 0;
+    }
+
+    return Math.round((a * defaultPrecision) / (b * defaultPrecision) * defaultPrecision) / defaultPrecision;
+
+}
+
+function divide(a, b) {
+    if (b === 0) return;   
+    return floatPrecisionTo(3, a, b);
+}
+
+function multiply(a, b) {
+    return Math.round(a  * b * 10000) / 10000;
+}
+
+function subtract(a, b) {
+    return (a * 10 - b * 10) / 10;
+}
+
+function add(a, b) {
+    console.log(typeof(a));
+    a = Number(a);
+    console.log(a)
+    return (a * 10 + b * 10) / 10;
 }
 
 
 let calcEntryRegExp = /[\d|.]/;
 
-
-
-
-let currentState = States.FirstOperand;
+let currentState = States.ProcessingFirstOperand;
 let calculationStatus = CalculationStatus.NotCalculating;
 
 
@@ -62,212 +96,180 @@ let num1 = "";
 let num2 = "";
 let operator = "";
 let floatingPoint = false;
-let error = false;
-let operatorMarked = false;
-let answer = 0;
+let result = "0";
 
-function checkIfNegative(num) {
+function isNegative(num) {
     return num[0] === "-";
 }
 
 function resetCalculation() {
 
     num1 = "";
-    display_value = "_";
-    num1 = "";
     num2 = "";
+    currentCalculationText = num1;
+    calculationResultText = "";
     operator = "";
     floatingPoint = false;
-    error = false;
-    operatorMarked = false;
-    currentState = States.FirstOperand;
-    calculationStatus = CalculationStatus.NotCalculating;
+    currentState = States.ProcessingFirstOperand;
+    calculationStatus = CalculationStatus.Calculating;
+    result = "";
 
 }
+
 
 function undoAction() {
-    let temp = display_value.slice(0, display_value.length - 1);
-    let isOP = temp[temp.length - 1] !== undefined;
-    if (isOP) {
-        currentState = States.Operator;
-    }
-    if (currentState === States.FirstOperand) {
+    if (num1 === "") return;
 
-        num1 = num1.slice(0, num1.length - 1);
+    
+    if (currentState === States.ProcessingFirstOperand) num1 = num1.slice(0, -1);
 
-        display_value = display_value.slice(0, display_value.length - 1);
-        if (display_value === "") {
-            resetCalculation();
-            
-        }
-        currentState = States.FirstOperand;
-
-    } else if (currentState === States.SecondOperand) {
-
-        num2 = num2.slice(0, num2.length - 1);
-
-        display_value = display_value.slice(0, display_value.length - 1);
-
-    } else if (currentState === States.Operator) {
-        display_value = display_value.slice(0, display_value.length - 1);
+    if (currentState === States.ProcessingSecondOperand && num2 === ""){
         operator = "";
-        operatorMarked = false;
-        num2 = "";
-        currentState = States.FirstOperand;
-    }
-}
+        currentState = States.ProcessingFirstOperand;  
+    } else if (currentState === States.ProcessingSecondOperand) num2 = num2.slice(0, -1);
 
-function processOperator(e) {
-    buttonPressed = e.target.textContent.trim();
-    if (operators[buttonPressed] === undefined) { return; }
-
-    if ((calculationStatus === CalculationStatus.Calculating)
-        && (currentState === States.Operator)
-        && !operatorMarked) {
-        operatorMarked = true;
-        currentState = States.SecondOperand;
-        operator = buttonPressed;
-        display_value += operator;
-        flip();
-    } else if (calculationStatus === CalculationStatus.NotCalculating) {
-        currentState = States.FirstOperand;
-    } else {
-        currentState = States.SecondOperand;
-    }
+    
 
 }
+
 
 const btnCE = document.getElementById("CE");
 const btnAC = document.getElementById("AC");
-const btnOperators = document.querySelectorAll(".button.operator")
+const btnOperators = document.querySelectorAll(".button.operator");
+const btnNumbers = document.querySelectorAll(".button.number");
+const btnMinus = document.getElementById("subtract");
+const btnEquals = document.getElementById("equals");
+const btnPoint = document.getElementById("point");
+const btns = document.querySelectorAll(".button")
+const btnMod = document.getElementById("mod");
 
+btnMod.addEventListener("click", e => {
+        
+})
+
+btnEquals.addEventListener("click", processResult);
 btnCE.addEventListener("click", undoAction);
 btnAC.addEventListener("click", resetCalculation);
+btnPoint.addEventListener("click", processFloatingPoint)
+btnMinus.addEventListener("click", processNegatives);
+
+
 btnOperators.forEach(btn => {
-    addEventListener("click", processOperator);
+    btn.addEventListener("click", processOperator);
+});
+btnNumbers.forEach(btn => {
+    btn.addEventListener("click", processNumber)
+})
+btns.forEach(btn => {
+    btn.addEventListener("click", updateScreen);
 });
 
 
-function flip() {
-    display.textContent = display_value;
+function processNegatives()
+{
+
+    if (currentState === States.ProcessingFirstOperand) {
+        if (Number(num1) < 0) return;
+        if (num1 === "") num1 += "-";
+        return;
+    };
+    if (currentState === States.ProcessingSecondOperand) {
+        if (Number(num2) < 0) return;
+        if (num2 === "") num2 += "-";
+        return;
+    };
+
+    return;
+}
+
+function processResult() {
+    if (num1 === "" || num2 === "" || calculationStatus === CalculationStatus.Calculated) return;
+    calculationStatus = CalculationStatus.Calculated;
+    currentState = States.ProcessingFirstOperand;
+    result = operate(operators[operator], num1, num2);
+    currentCalculationText = parseFloat(result)
+    calculationResultText = `${num1}${operator}${num2}=${currentCalculationText}`;
+    operator = ""
+}
+
+function processOperator(e) {
+    if (num1 === "-") return;
+    if (currentState === States.ProcessingSecondOperand) return;
+    if (calculationStatus === CalculationStatus.Calculated) {
+        calculationStatus = CalculationStatus.Calculating;
+        num1 = result;
+        num2 = "";
+    }
+    floatingPoint = false;
+    operator = e.target.textContent.trim();
+    currentState = States.ProcessingSecondOperand;
+    
+}
+
+
+function processFloatingPoint(e){
+
+    if (floatingPoint) return;
+    if (calculationStatus === CalculationStatus.Calculated){
+        resetCalculation();
+    }
+
+    if (currentState === States.ProcessingFirstOperand) num1 += ".";
+    else if (currentState === States.ProcessingSecondOperand) num2 += ".";
+
+    floatingPoint = true;
+
+    return;
 }
 
 
 
-buttons.forEach(b => {
-    b.addEventListener("click", (e) => {
+function processNumber(e) {
+
+    let num = e.target.textContent.trim();
+    if (calculationStatus === CalculationStatus.Calculated) resetCalculation();
+    if (currentState === States.ProcessingFirstOperand) num1 = modifyOperand(num1, num);
+    else if (currentState === States.ProcessingSecondOperand) num2 = modifyOperand(num2, num);
+    
+    return;
+
+}
 
 
-        let buttonPressed = e.target.textContent.trim();
-        let isNumberPressed = buttonPressed.match(calcEntryRegExp);
-        if (calculationStatus === CalculationStatus.Calculated) {
-            resetCalculation();
-        }
+function modifyOperand(num, modification) {
+
+    if (modification === "0" && num === "") return num += "0";
+
+    if (num === "0") num = "";
+    if (modification >= 0 && modification <= 9) return num += modification;
+
+    return;
+}
 
 
 
 
+// DISPLAY
+function refreshCurrentCalculationText() {
+    if (calculationStatus === CalculationStatus.Calculated) {
+        currentCalculationText = parseFloat(result);
+    } else {
 
-        // Handle aux buttons
-        if (calculationStatus === CalculationStatus.NotCalculating) {
-            switch (buttonPressed) {
-                case "mod":
-                    display_value = IMPLEMENTATION_MESSAGE;
-                    break;
-                case "xy":
-                    display_value = IMPLEMENTATION_MESSAGE;
-                    break;
-                case "=":
-                    display_value = ERROR_DISPLAY_MESSAGE;
-                    break;
-                case "AC":
-                    resetCalculation(e);
+        currentCalculationText = `${num1}${operator}${num2}`;
+    }
+    display.textContent = currentCalculationText;
+}
 
-                    break;
-                default:
-                    break;
-            }
-        }
+function displayResult() {
 
+    calculationDisplay.textContent = calculationResultText;
+}
 
-        // Handle negatives
-        let isAlreadyNegative = true;
+function updateScreen(){
 
-        if (buttonPressed === "-"
-            && calculationStatus === CalculationStatus.NotCalculating) {
+    refreshCurrentCalculationText();
+    displayResult();
 
-            display_value = "";
-            isAlreadyNegative = checkIfNegative(num1);
-            if (isAlreadyNegative) {
-                return;
-            }
-            num1 += "-";
-            display_value += "-";
+}
 
 
-        }
-        else if (buttonPressed === "-"
-            && currentState === States.SecondOperand
-            && num2 === "") {
-            isAlreadyNegative = checkIfNegative(num2);
-            if (isAlreadyNegative) {
-                return;
-            }
-            num2 += "-";
-            display_value += "-";
-        }
-
-
-        // Handle Operands
-        if (currentState === States.FirstOperand
-            && isNumberPressed) {
-
-                if (num1.length === 0 && buttonPressed === ".")
-            {
-                buttonPressed = "0."
-            }
-            if (calculationStatus === CalculationStatus.NotCalculating)
-            {
-                display_value = "";
-                calculationStatus = CalculationStatus.Calculating;
-            }
-
-
-            currentState = States.FirstOperand
-            calculationStatus = CalculationStatus.Calculating;
-            display_value += buttonPressed
-            num1 += buttonPressed;
-
-
-        } else if ((currentState === States.SecondOperand
-            && isNumberPressed)) {
-            
-            if (num2.length === 0 && buttonPressed === ".")
-            {
-                buttonPressed = "0."
-            }
-                
-            currentState = States.SecondOperand;
-            calculationStatus = CalculationStatus.Calculating;
-            display_value += buttonPressed
-            num2 += buttonPressed;
-
-
-        } else if (operators[buttonPressed] !== undefined && calculationStatus === CalculationStatus.Calculating) {
-            currentState = States.Operator;
-
-        }
-
-
-        // Handle result
-        if (num2 !== "" && buttonPressed === "=") {
-            answer = operate(operators[operator], num1, num2);
-            display_value = "" + answer;
-            flip();
-            calculationStatus = CalculationStatus.Calculated;
-        }
-
-        flip();
-    });
-
-})
