@@ -17,7 +17,7 @@ let buttons = document.querySelectorAll(".button");
 let display = document.querySelector(".bottom-screen>div")
 let calculationDisplay = document.querySelector(".top-screen>div");
 
-calculationDisplay.textContent = ""
+calculationDisplay.textContent = "3 + 4 = 25"
 
 
 function operate(operator, a, b) {
@@ -193,7 +193,7 @@ function processResult() {
 }
 
 function processOperator(e) {
-    if (num1 === "-") return;
+    if (num1 === "-" || num1 === "") return;
     if (currentState === States.ProcessingSecondOperand) return;
     if (calculationStatus === CalculationStatus.Calculated) {
         calculationStatus = CalculationStatus.Calculating;
