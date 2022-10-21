@@ -34,6 +34,8 @@ function operate(operator, a, b) {
     b = Number(b);
 
 
+
+
     switch (operator) {
         case "add":
             return String(add(a, b));
@@ -55,9 +57,9 @@ function validateNumber(a, b) {
 }
 
 
-function floatPrecisionTo(precision, a, b){
+function floatPrecisionTo(precision, a, b) {
     defaultPrecision = "1";
-    for (let zeros = 0; zeros < precision; zeros++){
+    for (let zeros = 0; zeros < precision; zeros++) {
         defaultPrecision += 0;
     }
 
@@ -66,12 +68,14 @@ function floatPrecisionTo(precision, a, b){
 }
 
 function divide(a, b) {
-    if (b === 0) return;   
+    if (b === 0) return;
     return floatPrecisionTo(3, a, b);
 }
 
 function multiply(a, b) {
-    return Math.round(a  * b * 10000) / 10000;
+    let valid = numberLengthValidator(a, b);
+    if (!valid) return;
+    return Math.round(a * b * 10000) / 10000;
 }
 
 function subtract(a, b) {
@@ -79,12 +83,23 @@ function subtract(a, b) {
 }
 
 function add(a, b) {
-    console.log(typeof(a));
+    let valid = numberLengthValidator(a, b);
+    if (!valid) return;
     a = Number(a);
     console.log(a)
     return (a * 10 + b * 10) / 10;
 }
 
+function numberLengthValidator(a, b) {
+    if ((a < -9999 || a > 9999) ||
+        (b < -9999 || b > 9999)) {
+        console.log("dsa");
+        alert("Numbers cannot be smaller than -9999 and larger than 9999");
+        return false;
+    }
+
+    return true;
+}
 
 let calcEntryRegExp = /[\d|.]/;
 
@@ -120,15 +135,15 @@ function resetCalculation() {
 function undoAction() {
     if (num1 === "") return;
 
-    
+
     if (currentState === States.ProcessingFirstOperand) num1 = num1.slice(0, -1);
 
-    if (currentState === States.ProcessingSecondOperand && num2 === ""){
+    if (currentState === States.ProcessingSecondOperand && num2 === "") {
         operator = "";
-        currentState = States.ProcessingFirstOperand;  
+        currentState = States.ProcessingFirstOperand;
     } else if (currentState === States.ProcessingSecondOperand) num2 = num2.slice(0, -1);
 
-    
+
 
 }
 
@@ -144,7 +159,7 @@ const btns = document.querySelectorAll(".button")
 const btnMod = document.getElementById("mod");
 
 btnMod.addEventListener("click", e => {
-        
+
 })
 
 btnEquals.addEventListener("click", processResult);
@@ -165,8 +180,7 @@ btns.forEach(btn => {
 });
 
 
-function processNegatives()
-{
+function processNegatives() {
 
     if (currentState === States.ProcessingFirstOperand) {
         if (Number(num1) < 0) return;
@@ -184,9 +198,13 @@ function processNegatives()
 
 function processResult() {
     if (num1 === "" || num2 === "" || calculationStatus === CalculationStatus.Calculated) return;
-    calculationStatus = CalculationStatus.Calculated;
     currentState = States.ProcessingFirstOperand;
     result = operate(operators[operator], num1, num2);
+    if (result === undefined) {
+        currentState = States.ProcessingSecondOperand;
+        return;
+    };
+    calculationStatus = CalculationStatus.Calculated;
     currentCalculationText = parseFloat(result)
     calculationResultText = `${num1}${operator}${num2}=${currentCalculationText}`;
     operator = ""
@@ -203,14 +221,14 @@ function processOperator(e) {
     floatingPoint = false;
     operator = e.target.textContent.trim();
     currentState = States.ProcessingSecondOperand;
-    
+
 }
 
 
-function processFloatingPoint(e){
+function processFloatingPoint(e) {
 
     if (floatingPoint) return;
-    if (calculationStatus === CalculationStatus.Calculated){
+    if (calculationStatus === CalculationStatus.Calculated) {
         resetCalculation();
     }
 
@@ -230,7 +248,7 @@ function processNumber(e) {
     if (calculationStatus === CalculationStatus.Calculated) resetCalculation();
     if (currentState === States.ProcessingFirstOperand) num1 = modifyOperand(num1, num);
     else if (currentState === States.ProcessingSecondOperand) num2 = modifyOperand(num2, num);
-    
+
     return;
 
 }
@@ -265,7 +283,7 @@ function displayResult() {
     calculationDisplay.textContent = calculationResultText;
 }
 
-function updateScreen(){
+function updateScreen() {
 
     refreshCurrentCalculationText();
     displayResult();
