@@ -17,7 +17,7 @@ let buttons = document.querySelectorAll(".button");
 let display = document.querySelector(".bottom-screen>div")
 let calculationDisplay = document.querySelector(".top-screen>div");
 
-calculationDisplay.textContent = "3 + 4 = 25"
+calculationDisplay.textContent = ""
 
 
 function operate(operator, a, b) {
@@ -86,7 +86,6 @@ function add(a, b) {
     let valid = numberLengthValidator(a, b);
     if (!valid) return;
     a = Number(a);
-    console.log(a)
     return (a * 10 + b * 10) / 10;
 }
 
@@ -200,7 +199,8 @@ function processResult() {
     if (num1 === "" || num2 === "" || calculationStatus === CalculationStatus.Calculated) return;
     currentState = States.ProcessingFirstOperand;
     result = operate(operators[operator], num1, num2);
-    if (result === undefined) {
+    if (result === "undefined") {
+
         currentState = States.ProcessingSecondOperand;
         return;
     };
@@ -256,6 +256,7 @@ function processNumber(e) {
 
 function modifyOperand(num, modification) {
 
+    if (num.length >= 5) return num += "";
     if (modification === "0" && num === "") return num += "0";
 
     if (num === "0") num = "";

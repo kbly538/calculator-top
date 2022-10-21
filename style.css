@@ -72,8 +72,15 @@ html {
 
 .screen > div {
     background-color: var(--screen-bg);
-    padding: 10px;
     margin-right: 10px;
+    padding-right: 5px;
+    font-size: 32px;
+    box-sizing: content-box;
+}
+
+.screen > .top-screen {
+    min-height: 20px;
+    box-sizing: content-box;
     font-size: 20px;
 }
 
@@ -108,6 +115,7 @@ html {
     display: flex;
     justify-content: center;
     align-items: center;
+    border: 2px solid #ffffff;
     
 }
 
@@ -130,4 +138,8 @@ html {
 
 #equals {
     background-color: var(--equals-bg);
+}
+
+.button:active {
+    background-color: #4d6263;
 }
